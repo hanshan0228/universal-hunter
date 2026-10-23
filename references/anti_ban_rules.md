@@ -1,0 +1,32 @@
+# Universal Hunter Anti-Ban & Countermeasures (2026 Edition)
+
+## 🛡️ 平台风控对抗与生存指南
+
+### 1. Reddit 2026 最新反作弊机制剖析
+- **SimHash 聚类算法**: Reddit 不仅检测完全相同的文本，还会将同一账号发出的评论进行 SimHash / MinHash 降维聚类。如果一个账号最近发出的 10 条评论相似度超过 50%，会被打上 `heuristic_spammer` 标签，后续所有评论直接进 Shadow-remove。
+- **AutoMod 正文正则**:
+  - `domain: [any external url]` -> 绝大多数商业版块（如 r/tiktokads）直接静默移除。
+  - `body: ["dm me", "let me know", "hit me up", "inbox me"]` -> 直接触发 Rule 6 (No Solicitation)。
+- **Karma 权重过滤**:
+  - `comment_karma < 10`: 在商业版块的发言会自动折叠或暂扣队列。
+  - `comment_karma < 50`: 触发高敏感版块的自动拦截。
+
+### 2. Bio-Routing（主页承接）的核心生存法则
+- **为什么 Bio-Routing 能做到 100% 存活？**
+  - 版块 AutoMod 只能审查帖子和评论的正文。如果正文只有纯技术干货和个人经验，完全不出现任何链接和推销词，AutoMod 规则命中率为 0。
+  - 潜在客户点击用户名查看你的 Reddit 个人 Profile 是 Reddit 官方鼓励的平台行为。
+  - 在 Profile 置顶帖中放置 `https://adgrowth-lab.github.io/` 受到 Reddit 全局 Terms 保护（在自己的 Profile 发帖不违反特定版块规则）。
+- **Profile 置顶帖搭建要点**:
+  - 标题必须是提供价值，而不是单纯打广告：
+    - ✅ *"Verified TikTok Agency Accounts with Tiered Spend Match: What Media Buyers Need to Know"*
+    - ❌ *"Buy TikTok Agency Accounts Now at 50% Off"*
+  - 正文把主要优势写清楚（白名单户、免每日限额、官方后台直接充值），并附上清爽的链接。
+
+### 3. Jaccard 相似度排重算法应用
+`scripts/db.py check_similarity` 实现了基于词集合的 Jaccard 距离检查：
+$$J(A, B) = \frac{|A \cap B|}{|A \cup B|}$$
+当相似度计算结果 $\ge 0.50$ 时，必须强制改换角度，例如：
+- 第一条从“$50 限额算法原理”切入；
+- 第二条从“虚拟卡支付风控”切入；
+- 第三条从“多像素资产隔离”切入。
+每个切入点用不同的词汇，确保文本指纹彻底离散。
