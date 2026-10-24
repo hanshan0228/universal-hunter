@@ -33,20 +33,49 @@ def get_db():
 def init_db():
     conn = get_db()
     cursor = conn.cursor()
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS interactions (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            niche TEXT NOT NULL DEFAULT 'default',
-            platform TEXT NOT NULL,
-            tier INTEGER NOT NULL,
-            url TEXT NOT NULL UNIQUE,
-            action TEXT NOT NULL,
-            reply_snippet TEXT,
-            target_user TEXT,
-            routing_mode TEXT DEFAULT 'bio_routing',
-            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
-        )
-    ''')
+    # Check if interactions table exists with old UNIQUE(url)
+    cursor.execute("SELECT sql FROM sqlite_master WHERE type='table' AND name='interactions'")
+    row = cursor.fetchone()
+    if row and "url TEXT NOT NULL UNIQUE" in row['sql']:
+        cursor.execute("ALTER TABLE interactions RENAME TO interactions_old")
+        cursor.execute('''
+            CREATE TABLE interactions (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                niche TEXT NOT NULL DEFAULT 'default',
+                platform TEXT NOT NULL,
+                tier INTEGER NOT NULL,
+                url TEXT NOT NULL,
+                action TEXT NOT NULL,
+                reply_snippet TEXT,
+                target_user TEXT,
+                routing_mode TEXT DEFAULT 'bio_routing',
+                timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(niche, url)
+            )
+        ''')
+        cursor.execute('''
+            INSERT OR IGNORE INTO interactions 
+            (id, niche, platform, tier, url, action, reply_snippet, target_user, routing_mode, timestamp)
+            SELECT id, niche, platform, tier, url, action, reply_snippet, target_user, routing_mode, timestamp
+            FROM interactions_old
+        ''')
+        cursor.execute("DROP TABLE interactions_old")
+    else:
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS interactions (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                niche TEXT NOT NULL DEFAULT 'default',
+                platform TEXT NOT NULL,
+                tier INTEGER NOT NULL,
+                url TEXT NOT NULL,
+                action TEXT NOT NULL,
+                reply_snippet TEXT,
+                target_user TEXT,
+                routing_mode TEXT DEFAULT 'bio_routing',
+                timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(niche, url)
+            )
+        ''')
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS keyword_logs (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -61,8 +90,8 @@ def init_db():
 def clean_url_str(url):
     if not url:
         return ""
-    # Strip query parameters and trailing slash
-    cleaned = url.split('?')[0].rstrip('/')
+    # Strip whitespace, query parameters, hash fragments, and trailing slashes
+    cleaned = url.strip().split('?')[0].split('#')[0].rstrip('/')
     return cleaned
 
 def stats(niche=None):
@@ -94,11 +123,12 @@ def stats(niche=None):
     conn.close()
 
 def check_keyword(keyword, niche='default'):
+    kw = (keyword or "").strip().lower()
     conn = get_db()
     cursor = conn.cursor()
     cursor.execute(
-        "SELECT COUNT(*) as cnt FROM keyword_logs WHERE keyword = ? AND niche = ? AND timestamp >= datetime('now', '-24 hours')",
-        (keyword, niche)
+        "SELECT COUNT(*) as cnt FROM keyword_logs WHERE LOWER(keyword) = ? AND niche = ? AND timestamp >= datetime('now', '-24 hours')",
+        (kw, niche)
     )
     cnt = cursor.fetchone()['cnt']
     print(json.dumps({
@@ -109,9 +139,10 @@ def check_keyword(keyword, niche='default'):
     conn.close()
 
 def log_keyword(keyword, niche='default'):
+    kw = (keyword or "").strip().lower()
     conn = get_db()
     cursor = conn.cursor()
-    cursor.execute("INSERT INTO keyword_logs (keyword, niche) VALUES (?, ?)", (keyword, niche))
+    cursor.execute("INSERT INTO keyword_logs (keyword, niche) VALUES (?, ?)", (kw, niche))
     conn.commit()
     print(json.dumps({"logged": True, "keyword": keyword, "niche": niche}))
     conn.close()
@@ -128,7 +159,7 @@ def check_url(url, niche=None):
     print(json.dumps({"duplicate": cnt > 0, "url": cleaned}))
     conn.close()
 
-def log_interaction(niche, platform, tier, url, action, reply_snippet, target_user, routing_mode='bio_routing'):
+def log_interaction(niche, platform, tier, url, action, reply_snippet, target_user='', routing_mode='bio_routing'):
     cleaned = clean_url_str(url)
     conn = get_db()
     cursor = conn.cursor()
@@ -140,16 +171,19 @@ def log_interaction(niche, platform, tier, url, action, reply_snippet, target_us
             (niche, platform, int(tier), cleaned, action, reply_snippet, target_user, routing_mode)
         )
         conn.commit()
-        print(json.dumps({"logged": True, "url": cleaned, "niche": niche}))
+        print(json.dumps({"logged": True, "url": cleaned, "niche": niche, "routing_mode": routing_mode}))
     except sqlite3.IntegrityError:
-        print(json.dumps({"logged": False, "error": "IntegrityError (duplicate URL)"}))
+        print(json.dumps({"logged": False, "error": "IntegrityError (duplicate URL for this niche)"}))
     conn.close()
 
 def tokenize(text):
     if not text:
         return set()
-    words = re.findall(r'[a-zA-Z0-9]+', text.lower())
-    return set(words)
+    # Match english words/numbers, and CJK characters/bigrams for accurate cross-language tokenization
+    cjk_chars = re.findall(r'[\u4e00-\u9fff]', text)
+    cjk_bigrams = [text[i:i+2] for i in range(len(text)-1) if re.match(r'[\u4e00-\u9fff]{2}', text[i:i+2])]
+    words = set(re.findall(r'[a-zA-Z0-9]+', text.lower()))
+    return words | set(cjk_bigrams) | set(cjk_chars)
 
 def check_similarity(new_text, niche=None, threshold=0.50):
     new_tokens = tokenize(new_text)
@@ -200,22 +234,26 @@ def check_similarity(new_text, niche=None, threshold=0.50):
 def check_karma_gate(karma_str, subreddit):
     try:
         karma = int(karma_str)
-    except ValueError:
+    except (ValueError, TypeError):
         karma = 0
-    sub_clean = subreddit.lower().replace('r/', '').strip()
+    # Clean subreddit: handle /r/name, r/name, name, or full reddit URLs like https://reddit.com/r/name/...
+    sub_raw = (subreddit or "").lower().strip()
+    sub_extracted = re.sub(r'^.*?/?r/', '', sub_raw).split('/')[0].strip()
     
-    if sub_clean in HIGH_RISK_COMMERCIAL_SUBS and karma < 50:
+    if sub_extracted in HIGH_RISK_COMMERCIAL_SUBS and karma < 50:
         print(json.dumps({
             "allowed": False,
             "karma": karma,
             "subreddit": subreddit,
-            "reason": f"Karma ({karma}) < 50. High risk of AutoMod instant ban in r/{sub_clean}. Switch to warming mode in general subreddits."
+            "clean_subreddit": sub_extracted,
+            "reason": f"Karma ({karma}) < 50. High risk of AutoMod instant ban in r/{sub_extracted}. Switch to warming mode in general subreddits."
         }))
     else:
         print(json.dumps({
             "allowed": True,
             "karma": karma,
-            "subreddit": subreddit
+            "subreddit": subreddit,
+            "clean_subreddit": sub_extracted
         }))
 
 if __name__ == '__main__':
@@ -238,12 +276,22 @@ if __name__ == '__main__':
         niche = sys.argv[3] if len(sys.argv) >= 4 else None
         check_url(sys.argv[2], niche)
     elif cmd == 'log_interaction' and len(sys.argv) >= 8:
-        # niche, platform, tier, url, action, reply_snippet, target_user, [routing_mode]
-        routing = sys.argv[8] if len(sys.argv) >= 9 else 'bio_routing'
-        log_interaction(sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5], sys.argv[6], sys.argv[7], sys.argv[8] if len(sys.argv) < 9 else sys.argv[8], routing)
+        target_user = sys.argv[8] if len(sys.argv) >= 9 else ''
+        routing = sys.argv[9] if len(sys.argv) >= 10 else 'bio_routing'
+        log_interaction(
+            niche=sys.argv[2],
+            platform=sys.argv[3],
+            tier=sys.argv[4],
+            url=sys.argv[5],
+            action=sys.argv[6],
+            reply_snippet=sys.argv[7],
+            target_user=target_user,
+            routing_mode=routing
+        )
     elif cmd == 'check_similarity' and len(sys.argv) >= 3:
         niche = sys.argv[3] if len(sys.argv) >= 4 else None
-        check_similarity(sys.argv[2], niche)
+        threshold = float(sys.argv[4]) if len(sys.argv) >= 5 else 0.50
+        check_similarity(sys.argv[2], niche, threshold)
     elif cmd == 'check_karma' and len(sys.argv) >= 4:
         check_karma_gate(sys.argv[2], sys.argv[3])
     else:
