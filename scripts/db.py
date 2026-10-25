@@ -33,10 +33,10 @@ def get_db():
 def init_db():
     conn = get_db()
     cursor = conn.cursor()
-    # Check if interactions table exists with old UNIQUE(url)
+    # Check if interactions table exists and ensure UNIQUE(niche, url, action)
     cursor.execute("SELECT sql FROM sqlite_master WHERE type='table' AND name='interactions'")
     row = cursor.fetchone()
-    if row and "url TEXT NOT NULL UNIQUE" in row['sql']:
+    if row and "UNIQUE(niche, url, action)" not in row['sql']:
         cursor.execute("ALTER TABLE interactions RENAME TO interactions_old")
         cursor.execute('''
             CREATE TABLE interactions (
@@ -50,7 +50,7 @@ def init_db():
                 target_user TEXT,
                 routing_mode TEXT DEFAULT 'bio_routing',
                 timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
-                UNIQUE(niche, url)
+                UNIQUE(niche, url, action)
             )
         ''')
         cursor.execute('''
@@ -60,7 +60,7 @@ def init_db():
             FROM interactions_old
         ''')
         cursor.execute("DROP TABLE interactions_old")
-    else:
+    elif not row:
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS interactions (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -73,7 +73,7 @@ def init_db():
                 target_user TEXT,
                 routing_mode TEXT DEFAULT 'bio_routing',
                 timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
-                UNIQUE(niche, url)
+                UNIQUE(niche, url, action)
             )
         ''')
     cursor.execute('''
@@ -98,26 +98,29 @@ def stats(niche=None):
     conn = get_db()
     cursor = conn.cursor()
     
-    if niche and niche != 'all':
-        cursor.execute(
-            "SELECT COUNT(*) as cnt FROM interactions WHERE niche = ? AND date(timestamp) = date('now')",
-            (niche,)
-        )
-        replies_today = cursor.fetchone()['cnt']
-        
-        cursor.execute("SELECT COUNT(*) as cnt FROM interactions WHERE niche = ?", (niche,))
-        total_interactions = cursor.fetchone()['cnt']
-    else:
-        cursor.execute("SELECT COUNT(*) as cnt FROM interactions WHERE date(timestamp) = date('now')")
-        replies_today = cursor.fetchone()['cnt']
-        
-        cursor.execute("SELECT COUNT(*) as cnt FROM interactions")
-        total_interactions = cursor.fetchone()['cnt']
-        
+    where_niche = "WHERE niche = ?" if (niche and niche != 'all') else ""
+    params = (niche,) if (niche and niche != 'all') else ()
+    
+    where_today = f"{where_niche} {'AND' if where_niche else 'WHERE'} date(timestamp) = date('now')"
+    
+    cursor.execute(f"SELECT COUNT(*) as cnt FROM interactions {where_today} AND action = 'reply'", params)
+    replies_today = cursor.fetchone()['cnt']
+    
+    cursor.execute(f"SELECT COUNT(*) as cnt FROM interactions {where_today} AND action = 'dm'", params)
+    dms_today = cursor.fetchone()['cnt']
+    
+    cursor.execute(f"SELECT COUNT(*) as cnt FROM interactions {where_niche}", params)
+    total_interactions = cursor.fetchone()['cnt']
+    
+    cursor.execute(f"SELECT routing_mode, COUNT(*) as cnt FROM interactions {where_niche} GROUP BY routing_mode", params)
+    by_routing_mode = {r['routing_mode']: r['cnt'] for r in cursor.fetchall()}
+    
     print(json.dumps({
         "niche": niche or "all",
         "replies_today": replies_today,
+        "dms_today": dms_today,
         "total_interactions": total_interactions,
+        "by_routing_mode": by_routing_mode,
         "max_daily_limit": 8
     }))
     conn.close()
@@ -147,16 +150,21 @@ def log_keyword(keyword, niche='default'):
     print(json.dumps({"logged": True, "keyword": keyword, "niche": niche}))
     conn.close()
 
-def check_url(url, niche=None):
+def check_url(url, niche=None, action='reply'):
     cleaned = clean_url_str(url)
     conn = get_db()
     cursor = conn.cursor()
+    query = "SELECT COUNT(*) as cnt FROM interactions WHERE url = ?"
+    params = [cleaned]
     if niche:
-        cursor.execute("SELECT COUNT(*) as cnt FROM interactions WHERE url = ? AND niche = ?", (cleaned, niche))
-    else:
-        cursor.execute("SELECT COUNT(*) as cnt FROM interactions WHERE url = ?", (cleaned,))
+        query += " AND niche = ?"
+        params.append(niche)
+    if action:
+        query += " AND action = ?"
+        params.append(action)
+    cursor.execute(query, params)
     cnt = cursor.fetchone()['cnt']
-    print(json.dumps({"duplicate": cnt > 0, "url": cleaned}))
+    print(json.dumps({"duplicate": cnt > 0, "url": cleaned, "action": action}))
     conn.close()
 
 def log_interaction(niche, platform, tier, url, action, reply_snippet, target_user='', routing_mode='bio_routing'):
@@ -274,7 +282,8 @@ if __name__ == '__main__':
         log_keyword(sys.argv[2], niche)
     elif cmd == 'check_url' and len(sys.argv) >= 3:
         niche = sys.argv[3] if len(sys.argv) >= 4 else None
-        check_url(sys.argv[2], niche)
+        action = sys.argv[4] if len(sys.argv) >= 5 else 'reply'
+        check_url(sys.argv[2], niche, action)
     elif cmd == 'log_interaction' and len(sys.argv) >= 8:
         target_user = sys.argv[8] if len(sys.argv) >= 9 else ''
         routing = sys.argv[9] if len(sys.argv) >= 10 else 'bio_routing'

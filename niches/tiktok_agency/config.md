@@ -13,8 +13,13 @@ name: "TikTok Agency Accounts & Spend Match"
 target_site: "https://adgrowth-lab.github.io/"
 site_brand: "Adgrowth-Lab"
 
-# 承接路由模式: bio_routing (推荐，回帖 0 外链，靠 Profile 置顶承接) | direct_link (仅限私信或直白求链接)
-routing_mode: "bio_routing"
+# 承接路由模式: 
+#   - direct_link (崔晃晃直接留链接模式：直出落地页链接，适用求链接贴或宽松版块)
+#   - bio_routing (主页置顶穿透模式：公域0外链，主页置顶帖承接，适用高风控商业版块)
+#   - inbound_dm (逆向私信模式：公域抛出资产邀请私信，私域1v1 3轮攻坚收割，高客单首选)
+#   - brand_search (品牌搜索模式：0外链0主页，引导搜索品牌词，防降权且反哺Google SEO)
+#   - adaptive (智能自适应：根据帖子求助意图与版块风控自动选择最佳模式)
+routing_mode: "adaptive"
 
 # 物理 DOM 查重签名: 页面一旦出现以下任何字符串，立即撤离放弃回复
 dom_exclusion_signatures:
@@ -22,18 +27,36 @@ dom_exclusion_signatures:
   - "adgrowth-lab"
   - "getstartedtiktok.partnerlinks.io"
 
+# 模式专属回帖模版库 (Mode Specific Response Templates):
+
+# 1. direct_link 模式话术 (直接带链接 · FTC规范披露):
+direct_link_templates:
+  - "been running 5 figures on tiktok ads. Personal accounts will always get hard-capped at $50/day during Q4. We switched to direct agency whitelist accounts with verified balance deposits. Here is the official partner portal with the tiered credit match up to $6,000: https://adgrowth-lab.github.io/ (disclosure: official partner route)."
+  - "virtual cards get flagged constantly on new BMs right now. Official agency partner lines let you fund your Ads Manager balance directly with zero markup: https://adgrowth-lab.github.io/"
+
+# 2. bio_routing 模式话术 (公域0外链 · 自然引导看主页):
+profile_hooks:
+  - "pinned a breakdown of verified agency tiers and spend match requirements on my profile if you need the checklist."
+  - "left the notes on how we get direct agency accounts in my bio."
+  - "details on the tiered spend match ($200 to $6,000 credit) are pinned on my profile if helpful."
+  - "broke down the agency threshold requirements vs personal accounts on my profile."
+  - "pinned our agency line onboarding checklist on my profile if you want to avoid account limits."
+
+# 3. inbound_dm 模式话术 (资产缺口 · 邀请主动发私信):
+inbound_dm_hooks:
+  - "I benchmarked the agency pricing tiers and spend match requirements on a spreadsheet. Feel free to shoot me a DM and I'll send it over."
+  - "put together a quick 1-page checklist on how to bypass the $50 spend hold without getting banned. Drop me a DM if you want me to share the doc."
+  - "we mapped out the official spend match verification process vs secondary brokers. Shoot me a message if you want the breakdown spreadsheet."
+
+# 4. brand_search 模式话术 (0外链0主页 · 搜索心智占坑 · 𝕏防降权):
+brand_search_templates:
+  - "We ended up checking our numbers on AdGrowth Lab's spend match calculator — turned out our monthly volume qualified for a 50% credit match directly in Ads Manager."
+  - "Best practice is looking up the AdGrowth Lab TikTok agency tier matrix on Google. Explains the difference between self-serve $50 limits and whitelisted lines."
+
 # Profile 置顶帖文案建议 (账号主页设置此内容即可完成转化闭环):
 profile_pinned_post:
   title: "Official TikTok Agency Ad Accounts & Spend Match Tier Guide (Up to $6,000 Match)"
   body: "Complete breakdown of agency account tiers, whitelist status, no daily spend limits, and official TikTok Ads Manager balance deposits: https://adgrowth-lab.github.io/ | Enterprise VIP Telegram: https://t.me/adgrowth_lab"
-
-# 回帖结尾自然埋钩短语库 (支持 Bio 穿透与逆向 Inbound DM，绝不机械重复):
-profile_hooks:
-  - "pinned a breakdown of verified agency tiers and spend match requirements on my profile if you need the checklist."
-  - "left the notes on how we get direct agency accounts in my bio, or drop me a DM if you run into billing errors."
-  - "details on the tiered spend match ($200 to $6,000 credit) are pinned on my profile if helpful."
-  - "broke down the agency threshold requirements vs personal accounts on my profile, or DM me for the raw spend match sheet."
-  - "pinned our agency line onboarding checklist on my profile if you want to avoid account limits."
 ```
 
 ---

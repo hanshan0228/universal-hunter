@@ -103,6 +103,37 @@ class TestUniversalHunterDB(unittest.TestCase):
             data = json.loads(mock_print.call_args[0][0])
             self.assertTrue(data["used_last_24h"])
 
+    def test_dm_and_reply_coexistence_and_routing_modes(self):
+        # 1. Log a public reply with direct_link
+        hunter_db.log_interaction("niche_dm", "reddit", 1, "https://reddit.com/post_dm_1", "reply", "Check this link", "user_1", "direct_link")
+        
+        # 2. Log a private DM on the SAME post/author with inbound_dm
+        hunter_db.log_interaction("niche_dm", "reddit", 1, "https://reddit.com/post_dm_1", "dm", "Here is your sheet", "user_1", "inbound_dm")
+        
+        conn = hunter_db.get_db()
+        rows = conn.execute("SELECT action, routing_mode FROM interactions WHERE niche='niche_dm'").fetchall()
+        self.assertEqual(len(rows), 2)
+        actions = {r["action"] for r in rows}
+        self.assertIn("reply", actions)
+        self.assertIn("dm", actions)
+        conn.close()
+
+        # 3. Check stats breakdown
+        with patch('builtins.print') as mock_print:
+            hunter_db.stats("niche_dm")
+            st = json.loads(mock_print.call_args[0][0])
+            self.assertEqual(st["replies_today"], 1)
+            self.assertEqual(st["dms_today"], 1)
+            self.assertEqual(st["total_interactions"], 2)
+            self.assertEqual(st["by_routing_mode"]["direct_link"], 1)
+            self.assertEqual(st["by_routing_mode"]["inbound_dm"], 1)
+
+        # 4. Check duplicate reply prevention
+        with patch('builtins.print') as mock_print:
+            hunter_db.check_url("https://reddit.com/post_dm_1", "niche_dm", "reply")
+            ck = json.loads(mock_print.call_args[0][0])
+            self.assertTrue(ck["duplicate"])
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -32,6 +32,18 @@
 
 ---
 
+## 🎛️ 5 大流量路由转化模式 (Selectable Conversion Modes)
+
+用户或 Agent 可在任务启动时显式指定模式，或在各 Niche 的 `config.md` 中配置 `routing_mode`：
+
+1. **`direct_link`（崔晃晃直出链接模式）**：公开回复直接附带落地页链接（带 FTC 合规披露）。适合楼主明确求链接、宽松版块或私信对话。
+2. **`bio_routing`（Profile 隐形穿透模式）**：公域 100% 专家干货、0 外链，随性挂 Profile Hook 引导至主页置顶帖承接落地页与 Telegram VIP。
+3. **`inbound_dm`（逆向私信 1v1 攻坚模式）**：公域抛出 20% 资产缺口邀请私信，受邀后启动 3 轮心智聊单流（破冰交付 ➔ 场景实测 ➔ 落地逼单）与异议化解。转化率高达 30%~50%，高客单首选。
+4. **`brand_search`（品牌搜索心智占坑模式）**：0 外链、0 主页诱导，自然嵌入品牌/工具名，引导主动在 Google 搜索，彻底免疫 𝕏/Reddit 算法外链降权，反哺品牌词 SEO。
+5. **`adaptive`（智能自适应模式 - 默认）**：根据帖子求助意图、目标版块风控、账号 Karma 门槛与平台外链策略，自动动态决策上述最优模式。
+
+---
+
 ## 📂 项目结构
 
 ```
@@ -48,6 +60,7 @@ universal-hunter/
 │       └── config.md
 ├── references/
 │   ├── anti_ban_rules.md             # 2026 最新平台反作弊机制与避坑指引
+│   ├── dm_funnel_playbook.md         # 1v1 私信 3 轮攻坚心智流与 4 大异议抗拒化解库
 │   ├── warmup_guide.md               # 养号与 Karma 爬坡阶段操作手册
 │   └── templates/
 │       └── config_template.md        # 新项目一键创建模板
