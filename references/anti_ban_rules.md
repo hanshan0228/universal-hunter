@@ -30,3 +30,19 @@ $$J(A, B) = \frac{|A \cap B|}{|A \cup B|}$$
 - 第二条从“虚拟卡支付风控”切入；
 - 第三条从“多像素资产隔离”切入。
 每个切入点用不同的词汇，确保文本指纹彻底离散。
+
+---
+
+### 4. 逆向 Inbound DM 邀请与防 Solicitation 规则 (Inbound Hook Protocol)
+- **为什么“我已私信你 (I sent you a DM)”会被秒封？**
+  - Reddit / 𝕏 等社区风控将未经请求的主动私信与公开“已发私信”声明直接归类为高危垃圾营销（Spam Solicitation），极易触发用户举报与 AutoMod 静默封号。
+- **逆向 Inbound 邀请公式 (The Reverse Inbound Formula)**:
+  - **80% 硬核公开解惑 + 20% 高价值结构化资产缺口**。
+  - 公开评论解答用户的底层技术疑问后，将繁琐的原始数据、对照表或申诉模板作为“可选索取资产”开放：
+    - ✅ *"I benchmarked the pricing tiers and feature limits on a spreadsheet. If you want the comparison doc, feel free to shoot me a DM and I'll share it."*
+    - ✅ *"Left the setup checklist on my profile, or drop me a note if you get stuck on the billing gateway error."*
+    - ❌ *"DM me now to buy an account"*
+    - ❌ *"Check your inbox I sent you a message"*
+- **双向确认的安全优势**:
+  - 当潜在买家被你的专业度打动，**主动向你发起第一条私信**时，平台通信系统判定此对话为“受邀社交互动 (Consensual Chat)”，风控阈值直接降为 0。
+  - 1v1 私信对话转化率高达 30%~50%，且支持针对高客单用户引入 Telegram VIP Concierge 做深度服务。

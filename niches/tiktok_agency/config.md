@@ -20,19 +20,20 @@ routing_mode: "bio_routing"
 dom_exclusion_signatures:
   - "adgrowth-lab.github.io"
   - "adgrowth-lab"
-  - "ttoh.app"
+  - "getstartedtiktok.partnerlinks.io"
 
 # Profile 置顶帖文案建议 (账号主页设置此内容即可完成转化闭环):
 profile_pinned_post:
   title: "Official TikTok Agency Ad Accounts & Spend Match Tier Guide (Up to $6,000 Match)"
-  body: "Complete breakdown of agency account tiers, whitelist status, no daily spend limits, and official TikTok Ads Manager balance deposits: https://adgrowth-lab.github.io/"
+  body: "Complete breakdown of agency account tiers, whitelist status, no daily spend limits, and official TikTok Ads Manager balance deposits: https://adgrowth-lab.github.io/ | Enterprise VIP Telegram: https://t.me/adgrowth_lab"
 
-# 回帖结尾自然埋钩短语库 (随机挑选，绝不机械重复):
+# 回帖结尾自然埋钩短语库 (支持 Bio 穿透与逆向 Inbound DM，绝不机械重复):
 profile_hooks:
   - "pinned a breakdown of verified agency tiers and spend match requirements on my profile if you need the checklist."
-  - "left the notes on how we get direct agency accounts in my bio."
-  - "details on the tiered spend match are pinned on my profile."
-  - "broke down the agency threshold requirements vs personal accounts on my profile if helpful."
+  - "left the notes on how we get direct agency accounts in my bio, or drop me a DM if you run into billing errors."
+  - "details on the tiered spend match ($200 to $6,000 credit) are pinned on my profile if helpful."
+  - "broke down the agency threshold requirements vs personal accounts on my profile, or DM me for the raw spend match sheet."
+  - "pinned our agency line onboarding checklist on my profile if you want to avoid account limits."
 ```
 
 ---

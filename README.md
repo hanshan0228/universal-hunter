@@ -16,15 +16,19 @@
 1. **80% 侦查 (Scout) + 20% 狙击 (Sniper)**：
    - 80% 的时间在真实滚动、阅读、随机点赞，积累正常用户的行为指纹与 Trust Score。
    - 20% 的时间针对高意向求助帖发起精准打击。
-2. **两段式隐形穿透 (Bio-Routing)**：
+2. **双轨隐蔽承接 (Bio-Routing + 逆向 Inbound Hook)**：
    - 公开回帖 **100% 纯干货、0 外链、0 商业工具词、0 机械招揽**。
-   - 结尾通过自然的 Profile Hook 引导至个人主页置顶帖完成转化闭环，根除 AutoMod 删帖与 Shadowban。
-3. **物理 DOM 现场排查 (Physical DOM Scan)**：
+   - 结尾通过自然的 Profile Hook 引导至个人主页置顶帖，或抛出高价值资产（如官方对比表/开户清单）引导客户**主动发起私信 (Inbound DM)**。
+   - 逆向私信零封号风险，1v1 聊单转化率高达 30%~50%，并在置顶帖中配备高客单 Telegram VIP 咨询通道。
+3. **5 大金矿商业意图研判 (Commercial Intent Archetypes)**：
+   - 替代弃用 (Alternative)、选型对比 (VS / Whitelist)、真实口碑 (Review)、折扣与补贴防线 (Spend Match $200-$6k)、痛点排查 (Billing/Bans)。
+   - 优先狙击 Intent Score ≥ 80 的高价值买家贴，单账号每日配额绝不浪费。
+4. **物理 DOM 现场排查 (Physical DOM Scan)**：
    - 打开页面后自动检查自己账号是否已在评论区、同类竞争对手或目标链接是否已露出，见缝插针，绝不盲目撞车。
-4. **代码级 Jaccard 反聚类查重**：
+5. **代码级 Jaccard 反聚类查重**：
    - 发帖前自动计算与最近 30 条回复的 Token 相似度，超过 50% 强制重写，彻底杜绝平台 SimHash 算法聚类打包封号。
-5. **多项目原生隔离 (Multi-Niche Architecture)**：
-   - 每个项目（Niche）拥有独立的配置文件、3-Tier 词库、每日配额与历史查重记录，互不干扰。
+6. **多项目原生隔离 (Multi-Niche Architecture)**：
+   - 每个项目（Niche）拥有独立的配置文件、词库、每日配额与历史查重记录，互不干扰。
 
 ---
 

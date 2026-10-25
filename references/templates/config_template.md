@@ -19,12 +19,14 @@ dom_exclusion_signatures:
 # Profile 置顶帖文案建议:
 profile_pinned_post:
   title: "Your Value Guide Title"
-  body: "Short description with link: https://your-landing-page.com"
+  body: "Short description with link: https://your-landing-page.com | VIP Support: https://t.me/your_concierge"
 
-# 回帖结尾自然埋钩短语库:
+# 回帖结尾自然埋钩短语库 (Bio-Routing 与 逆向 Inbound DM 邀请):
 profile_hooks:
   - "pinned the complete breakdown on my profile if helpful."
   - "left the direct checklist in my bio."
+  - "feel free to shoot me a DM if you want me to share the raw comparison sheet."
+  - "left the notes on my profile, or drop me a note if you run into setup errors."
 
 # 目标版块池:
 target_subreddits:

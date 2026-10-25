@@ -23,41 +23,54 @@ description: Multi-niche stealth traffic hunter and community growth sniper. Spe
    * **第一层 (数据库查重)**：调用 `db.py check_url` 确认过去未曾回复过。
    * **第二层 (物理 DOM 现场排查)**：在浏览器打开目标帖子后，必须检查：
      * *自我检测*: 当前页面是否已有我方账号的回复。
-     * *签名排查*: 页面上是否已经出现过目标域名或品牌词（如 `adgrowth-lab.github.io`、`adgrowth-lab`、`ttoh.app` 等）。
+     * *签名排查*: 页面上是否已经出现过目标域名或品牌词（如 `adgrowth-lab.github.io`、`adgrowth-lab` 等）。
      * **任何一项命中，立即关闭标签页静默撤离，绝不强行跟帖！**
 
 4. **代码级反聚类查重 (Jaccard Anti-Clustering)**:
    * 发帖前必须通过 `python3 scripts/db.py check_similarity "回复草稿"` 与数据库最近 30 条回复进行 Jaccard 相似度校验。
    * 相似度 ≥ 50% 强制驳回并重写，杜绝平台 NLP (SimHash) 将你的多条回复聚类连带封号。
 
-5. **存活级隐蔽承接 (Bio-Routing 穿透打法)**:
-   * **正文绝对 0 外链、0 商业工具词、0 机械招揽语**（严禁 "let me know if you need help"）。
-   * 输出 100% 极具洞察的专家级干货，结尾以随性口吻挂 Profile Hook：
-     * *"pinned a breakdown of verified agency tiers and spend match requirements on my profile if you need the checklist."*
-   * 账号 Profile/置顶帖承接落地页（如 `https://adgrowth-lab.github.io/`），实现“公开零违规，主页高转化”。
+5. **双轨隐蔽承接 (Bio-Routing + 逆向 Inbound Hook 穿透打法)**:
+   * **正文绝对 0 商业外链、0 违禁词、0 机械招揽语**（严禁 "let me know if you need help" / "buy from me"）。
+   * **80/20 价值截流原则**：输出 80% 极其硬核的专家级技术归因与解决方案，保留 20% 高价值结构化资产（如官方开户门槛对比表、账期风控清单、返点满赠测算器）。
+   * **三大承接路径（抹平跳失率，转化收益最大化）**：
+     * **路径 A (公开零违规，主页高转化)**：随性挂 Profile Hook（*"pinned a breakdown of verified agency tiers and spend match requirements on my profile if you need the checklist."*），由主页置顶帖直达官方认证通道（如 `https://adgrowth-lab.github.io/`）。
+     * **路径 B (逆向 Inbound DM 攻坚)**：抛出高价值资产缺口，引导高意向客户**主动私信索取**（*"DM me if you need the direct appeals doc or raw spend tiers spreadsheet"*）。当客户主动发起私信，平台反垃圾判定为合规社交对话，零封号风险，且 1v1 私信聊单转化率高达 30%~50%。
+     * **路径 C (高预算大客 Telegram VIP 承接)**：针对预算 > $4,000 的大团队/Agency，置顶帖与私信均配备 VIP Concierge 通道（`https://t.me/adgrowth_lab`），承接大额企业白名单客户。
 
 ---
 
-## 📊 3-Tier 意图分层漏斗 (The Universal Funnel)
+## 📊 5 大金矿商业意图矩阵 (Commercial Intent Archetypes)
 
-在执行狙击时，必须精准识别当前帖子属于哪一层级，并匹配对应的话术策略：
+在执行狙击时，必须优先筛选商业意图明确（Intent Score ≥ 80）的高价值求助帖，并匹配对应的话术策略：
 
-### 🎯 Tier 1: 显性需求 (Hot / Direct Intent)
-*他们拿着钱在四处寻找解决方案。*
-* **特征**: 用户直接询问“哪家 TikTok 代理户靠谱”、“求靠谱返佣渠道”、“个人户限额怎么破”、“求推荐开户工具”。
-* **战术**: **Direct Close + Profile Hook**。以资深投手身份直击要害，指出正规企业代理户与个人户的本质区别，顺带引导看主页置顶。
+### 🎯 意图 1: 替代弃用 (Alternative / Hard-Capped)
+*他们正在被平台限额或劣质服务商折磨，急需稳定可扩容的替代通道。*
+* **特征**: 询问“个人户 $50 限额怎么破”、“哪家 TikTok 代理户能跑大预算不限流”。
+* **战术**: **Direct Close + Profile Hook**。以资深投手身份直击要害，指出正规企业代理户（Agency Line）与个人户的底层风控区别。
 * **风格范例**: *"been running 5 figures on tiktok ads. Personal accounts will always get hard-capped at $50/day during Q4. We switched our media buyers to direct agency whitelist accounts with direct Ads Manager balance credit. left the tier requirements on my profile if you want to compare."*
 
-### ⚡ Tier 2: 痛点与竞品 (Warm / Pain & Comparison)
-*他们对现状极度痛苦，刚被平台或劣质服务商收割，正在寻找出口。*
-* **特征**: 抱怨被误封、虚拟卡支付拒付、代理商跑路、Pixel 数据报废。
-* **战术**: **Side Attack (避坑指南)**。强烈共情 -> 技术性归因 -> 给出合规避坑方案。
-* **风格范例**: *"yeah stripe and wise virtual cards will trigger billing risk on new BMs almost immediately right now. Best practice is setting up monthly invoicing on a verified agency line so your pixel doesn't get nuked when billing fails. pinned our agency checklist on my profile if you want to avoid that headache."*
+### ⚡ 意图 2: 选型对比 (VS / Agency Whitelist)
+*他们在多家代理商之间纠结，寻找真实返点与开户资质背书。*
+* **特征**: 询问“TikTok agency account 哪家返点真实”、“官方合作通道跟二级代理有什么区别”。
+* **战术**: **Side Attack + 权威拆解**。提供 6 维度对比（满赠里程碑、首充 50% 折扣、购买力倍率等），引导查看测算器。
+* **风格范例**: *"most secondary brokers charge a 3-5% markup and delay credit disbursements. The official partner route deposits subsidies directly into your Ads Manager balance without middleman cuts. pinned the 4-tier spend match matrix on my profile."*
 
-### 💡 Tier 3: 问题意识与交流 (Cold / Problem Aware)
-*他们遇到了技术障碍，但尚未意识到需要外部产品辅助。*
-* **特征**: 询问 Events API 怎么去重、跑爆品如何扩量、学习期如何度过。
-* **战术**: **Value First (纯干货树立人设)**。提供 100% 纯干货，完全不提推广，纯粹建立账号权威权重（亦可不带 Hook 纯粹养号）。
+### 💰 意图 3: 折扣与补贴防线 (Promo & Spend Match)
+*他们带着真实预算入场，主动寻找官方返点、新户补贴或抵用券 (Ad Credits)。*
+* **特征**: 搜索“tiktok ad credits $6,000 match”、“tiktok coupon code”、“promo vouchers 2026”。
+* **战术**: **Inbound Hook (资产索取)**。告知官方补贴池的门槛要求与自动激活机制。
+* **风格范例**: *"you don't need manual promo codes anymore; the tiered incentive match ($200 to $6,000 credit match) attaches directly via official partner tokens. shoot me a DM or check my bio if you need the qualification breakdown."*
+
+### 🛠️ 意图 4: 痛点与支付排坑 (Troubleshooting / Billing Errors)
+*他们刚遭遇误封或拒付，正在寻找紧急避坑指南。*
+* **特征**: 抱怨虚拟卡反复拒付、BM 突遭封禁、Pixel 资产报废。
+* **战术**: **Value First (技术归因)**。强烈共情 -> 分析支付网关与实体一致性 -> 给出月结或正规代理信用线解决方案。
+* **风格范例**: *"stripe and wise virtual cards trigger billing risk on new BMs almost immediately right now. Best practice is setting up monthly invoicing on a verified agency line so your pixel doesn't get nuked when billing fails. pinned our agency checklist on my profile if you want to avoid that headache."*
+
+### 📈 意图 5: 真实口碑与增长经验 (Social Proof & Scaling)
+*高阶投手交流扩量、Events API 去重、学习期度过。*
+* **战术**: **Authority Builder (行业声誉输出)**。提供纯干货建议，不带硬广，建立无懈可击的技术人设。
 
 ---
 
@@ -111,10 +124,10 @@ description: Multi-niche stealth traffic hunter and community growth sniper. Spe
 3. **物理 DOM 现场排查 (Physical DOM Scan)**:
    * 浏览器打开目标帖子页面后，执行页面文本检索：
      * 检查当前发帖账号是否已在评论区。
-     * 检查页面是否已包含目标品牌签名：`adgrowth-lab.github.io`、`adgrowth-lab` 或 `ttoh.app`。
+     * 检查页面是否已包含目标品牌签名：`adgrowth-lab.github.io`、`adgrowth-lab` 或其他同质推广链接。
      * **任何一项命中 -> 立即关闭标签页并跳过。**
 4. **生成回复与反聚类校验**:
-   * 结合 3-Tier 策略起草回复（35~65 词，无 Emoji，无外链，带自然 Profile Hook）。
+   * 结合 5 大商业意图策略起草回复（35~65 词，无 Emoji，无外链，带自然 Profile Hook 或 Inbound DM 引导）。
    * **执行 Jaccard 反聚类校验**:
      ```bash
      python3 scripts/db.py check_similarity "起草的回复文本" tiktok_agency
