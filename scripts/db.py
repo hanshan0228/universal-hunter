@@ -317,6 +317,36 @@ if __name__ == '__main__':
         check_similarity(sys.argv[2], niche, threshold)
     elif cmd == 'check_karma' and len(sys.argv) >= 4:
         check_karma_gate(sys.argv[2], sys.argv[3])
+    elif cmd == 'humanize' and len(sys.argv) >= 3:
+        try:
+            from scripts.humanize import humanize_text
+        except ImportError:
+            from humanize import humanize_text
+        print(json.dumps({"humanized": humanize_text(sys.argv[2])}, ensure_ascii=False))
+    elif cmd == 'check_bio' and len(sys.argv) >= 3:
+        try:
+            from scripts.bio_checker import check_reddit_bio
+        except ImportError:
+            from bio_checker import check_reddit_bio
+        res = check_reddit_bio(sys.argv[2])
+        print(json.dumps(res, ensure_ascii=False, indent=2))
+    elif cmd == 'check_visibility' and len(sys.argv) >= 3:
+        try:
+            from scripts.visibility import check_visibility
+        except ImportError:
+            from visibility import check_visibility
+        cid = sys.argv[3] if len(sys.argv) >= 4 else ""
+        res = check_visibility(sys.argv[2], cid)
+        print(json.dumps(res, ensure_ascii=False, indent=2))
+    elif cmd == 'warm':
+        try:
+            from scripts.warming import run_warming_batch
+        except ImportError:
+            from warming import run_warming_batch
+        sub = sys.argv[2] if len(sys.argv) >= 3 else "AskReddit"
+        lim = int(sys.argv[3]) if len(sys.argv) >= 4 else 3
+        res = run_warming_batch(sub, limit=lim)
+        print(json.dumps(res, ensure_ascii=False, indent=2))
     else:
         print(json.dumps({"error": f"Unknown command or invalid args: {cmd}"}))
         sys.exit(1)

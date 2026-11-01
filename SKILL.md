@@ -130,33 +130,64 @@ description: Multi-niche stealth traffic hunter and community growth sniper. Fea
    python3 scripts/db.py check_url "TARGET_URL" tiktok_agency
    ```
    *若返回 `duplicate: true`，立即放弃该帖。*
-2. **账号 Karma 门禁**:
+
+2. **账号 Karma 门禁 (一票否决制)**:
    ```bash
    python3 scripts/db.py check_karma CURRENT_KARMA TARGET_SUBREDDIT
    ```
-   *若 `allowed: false`，严禁在高风险商业版块发帖，强制分流至非商业版块养号。*
-3. **物理 DOM 现场排查 (Physical DOM Scan)**:
+   *若返回 `allowed: false`，严禁在高风险商业版块发帖（尤其是 r/TikTokAds 极危版块一票否决），强制执行 Phase 0 养号模式分流至 r/AskReddit 积累 Karma。*
+
+3. **主页 Bio 承接就绪核验 (Bio Readiness Gate)**:
+   *在采用 `bio_routing` 前，前置核验账号主页简介是否有效配置：*
+   ```bash
+   python3 scripts/db.py check_bio CURRENT_USERNAME
+   ```
+   *若返回 `bio_ready: false`，系统强制降级为 100% 纯干货解答，严禁输出“看我主页”等招揽词。*
+
+4. **物理 DOM 现场排查 (Physical DOM Scan)**:
    * 浏览器打开目标帖子页面后，执行页面文本检索：
      * 检查当前发帖账号是否已在评论区。
      * 检查页面是否已包含目标品牌签名：`adgrowth-lab.github.io`、`adgrowth-lab` 或其他同质推广链接。
      * **任何一项命中 -> 立即关闭标签页并跳过。**
-4. **根据选定模式生成回复与反聚类校验**:
-   * 根据当前生效的路由模式（`direct_link` / `bio_routing` / `inbound_dm` / `brand_search` / `adaptive`）与 5 大意图起草回复（35~65 词，无 Emoji，符合模式要求）。
+
+5. **生成回复、动态降质与反聚类校验**:
+   * 根据当前生效的路由模式起草回复（35~65 词，无 Emoji）。
+   * **执行动态拟真降质 (Humanization)**：剥除 AI 招揽尾巴与格式特征：
+     ```bash
+     python3 scripts/db.py humanize "起草的回复文本"
+     ```
    * **执行 Jaccard 反聚类校验**:
      ```bash
      python3 scripts/db.py check_similarity "起草的回复文本" tiktok_agency
      ```
    * **若返回 `allowed: false`：必须重写，严禁强行发送！**
-5. **执行发送与入库**:
+
+6. **执行发送与入库**:
    * 发送回复。
    * 立即写入本地数据库（注明生效的 `routing_mode`）：
      ```bash
      python3 scripts/db.py log_interaction "tiktok_agency" "reddit" 1 "CLEAN_URL" "reply" "REPLY_SNIPPET" "TARGET_USERNAME" "bio_routing"
      ```
 
-### Phase 4: 撤离与清理 (Cleanup)
+### Phase 4: 撤离与存活巡检 (Cleanup & Visibility Audit)
 1. **关闭会话标签页**: 任务完成后，立即关闭所有浏览器标签页，避免挂载多余会话指纹。
-2. **状态记录**: 汇报本次行动所消耗的侦查时间、交互帖、以及成功狙击的目标。
+2. **游客态 DOM 存活巡检 (Visibility Audit)**:
+   *以无状态游客身份穿透检测评论物理存活状态（过滤 Cloudflare/WAF 假告警）：*
+   ```bash
+   python3 scripts/db.py check_visibility "TARGET_URL" "COMMENT_ID"
+   ```
+   *若返回 `status: INVISIBLE`，系统立即触发移动端 Bark 报警并提示账号权重不足。*
+3. **状态记录**: 汇报本次行动所消耗的侦查时间、交互帖、以及成功狙击的目标。
+
+---
+
+### Phase 0: 零风险养号控温模式 (Karma Warming Mode)
+
+当账号刚注册或 `Karma < 50` 时，禁止进入 `r/TikTokAds`、`r/facebookads` 等商业版块。执行养号控温：
+```bash
+python3 scripts/db.py warm AskReddit 3
+```
+*自动检索通用版块优质话题，生成 0 营销、纯情感共鸣与趣味互动的短评，在前 7 天快速积累 50+ Karma，彻底消除平台 AutoMod 秒删威胁。*
 
 ---
 

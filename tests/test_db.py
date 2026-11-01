@@ -1,9 +1,12 @@
 import os
+import sys
 import unittest
 import sqlite3
 import tempfile
 import json
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # Point DB_PATH to a temporary database for test isolation
 test_dir = tempfile.TemporaryDirectory()
@@ -152,6 +155,62 @@ class TestUniversalHunterDB(unittest.TestCase):
             hunter_db.check_karma_gate("60", "TikTokAds")
             data = json.loads(mock_print.call_args[0][0])
             self.assertTrue(data["allowed"])
+
+    def test_humanize_and_strip_solicitation(self):
+        from scripts.humanize import humanize_text, strip_ai_solicitation, strip_bio_hooks
+        raw = "Agency accounts bypass threshold holds. Let me know if you need any help!"
+        cleaned = strip_ai_solicitation(raw)
+        self.assertEqual(cleaned, "Agency accounts bypass threshold holds.")
+
+        raw_bio = "Here is the calculation. Pinned a breakdown on my profile."
+        cleaned_bio = strip_bio_hooks(raw_bio)
+        self.assertNotIn("pinned a breakdown", cleaned_bio.lower())
+
+        humanized = humanize_text(raw, lowercase_prob=1.0, strip_period_prob=1.0, contractions_prob=0.0)
+        self.assertTrue(humanized.startswith("a"))
+        self.assertFalse(humanized.endswith("."))
+
+    @patch("urllib.request.urlopen")
+    def test_bio_readiness_check(self, mock_urlopen):
+        from scripts.bio_checker import check_reddit_bio
+        mock_resp = MagicMock()
+        mock_resp.status = 200
+        mock_resp.read.return_value = json.dumps({
+            "data": {
+                "name": "tester",
+                "link_karma": 100,
+                "comment_karma": 60,
+                "total_karma": 160,
+                "subreddit": {
+                    "public_description": "Verified TikTok Ads whitelist guides pinned."
+                }
+            }
+        }).encode("utf-8")
+        mock_urlopen.return_value.__enter__.return_value = mock_resp
+
+        res = check_reddit_bio("tester")
+        self.assertTrue(res["bio_ready"])
+        self.assertTrue(res["routing_allowed"])
+
+    @patch("urllib.request.urlopen")
+    def test_visibility_inspection(self, mock_urlopen):
+        from scripts.visibility import check_reddit_visibility
+        mock_resp = MagicMock()
+        mock_resp.status = 200
+        mock_resp.read.return_value = b"""
+        <html>
+            <body>
+                <div class="comment" thingid="t1_c999" id="t1_c999">
+                    <p>Live comment content</p>
+                </div>
+            </body>
+        </html>
+        """
+        mock_urlopen.return_value.__enter__.return_value = mock_resp
+
+        res = check_reddit_visibility("https://reddit.com/r/test/comments/123", "c999")
+        self.assertTrue(res["visible"])
+        self.assertEqual(res["status"], "VISIBLE")
 
 
 if __name__ == '__main__':
