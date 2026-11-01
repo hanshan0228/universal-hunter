@@ -24,6 +24,10 @@ HIGH_RISK_COMMERCIAL_SUBS = {
     'shopify', 'affiliate_marketing', 'adops', 'ecommerce', 'ppc'
 }
 
+CRITICAL_RISK_COMMERCIAL_SUBS = {
+    'tiktokads'
+}
+
 def get_db():
     os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
     conn = sqlite3.connect(DB_PATH)
@@ -247,13 +251,23 @@ def check_karma_gate(karma_str, subreddit):
     # Clean subreddit: handle /r/name, r/name, name, or full reddit URLs like https://reddit.com/r/name/...
     sub_raw = (subreddit or "").lower().strip()
     sub_extracted = re.sub(r'^.*?/?r/', '', sub_raw).split('/')[0].strip()
-    
-    if sub_extracted in HIGH_RISK_COMMERCIAL_SUBS and karma < 50:
+
+    if sub_extracted in CRITICAL_RISK_COMMERCIAL_SUBS and karma < 50:
         print(json.dumps({
             "allowed": False,
             "karma": karma,
             "subreddit": subreddit,
             "clean_subreddit": sub_extracted,
+            "is_critical": True,
+            "reason": f"CRITICAL 极危门禁 (一票否决): Karma ({karma}) < 50。r/{sub_extracted} 存在竞品清场机器人与严厉 AutoMod，新号发帖必被秒删。严禁在此发帖。"
+        }))
+    elif sub_extracted in HIGH_RISK_COMMERCIAL_SUBS and karma < 50:
+        print(json.dumps({
+            "allowed": False,
+            "karma": karma,
+            "subreddit": subreddit,
+            "clean_subreddit": sub_extracted,
+            "is_critical": False,
             "reason": f"Karma ({karma}) < 50. High risk of AutoMod instant ban in r/{sub_extracted}. Switch to warming mode in general subreddits."
         }))
     else:

@@ -134,6 +134,25 @@ class TestUniversalHunterDB(unittest.TestCase):
             ck = json.loads(mock_print.call_args[0][0])
             self.assertTrue(ck["duplicate"])
 
+    def test_karma_gate_critical_and_high_risk(self):
+        with patch('builtins.print') as mock_print:
+            hunter_db.check_karma_gate("10", "TikTokAds")
+            data = json.loads(mock_print.call_args[0][0])
+            self.assertFalse(data["allowed"])
+            self.assertTrue(data.get("is_critical"))
+            self.assertIn("CRITICAL 极危门禁", data["reason"])
+
+        with patch('builtins.print') as mock_print:
+            hunter_db.check_karma_gate("10", "dropship")
+            data = json.loads(mock_print.call_args[0][0])
+            self.assertFalse(data["allowed"])
+            self.assertFalse(data.get("is_critical"))
+
+        with patch('builtins.print') as mock_print:
+            hunter_db.check_karma_gate("60", "TikTokAds")
+            data = json.loads(mock_print.call_args[0][0])
+            self.assertTrue(data["allowed"])
+
 
 if __name__ == '__main__':
     unittest.main()
